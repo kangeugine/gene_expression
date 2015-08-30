@@ -8,7 +8,7 @@ script: "Data Cleaning.R"
 3. Reduce multicollinearity by removing features with correlation higher than 0.7
 
 ### Feature Selection 
-script: "Feature Selection.R" 
-1. Prepare training scheme, 10-Fold CV  
-2. Calculate feature importance with RandomForest 
-3. Visualize the numbers of features selected by importance threshold 
+script: "Feature Selection.R"   
+1. Prepare training scheme, 10-Fold CV    
+2. Calculate feature importance with RandomForest   
+3. Visualize the numbers of features selected by importance threshold   
