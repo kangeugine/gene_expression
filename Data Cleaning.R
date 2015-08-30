@@ -42,5 +42,7 @@ corMat <- cor(dataScale)
 require(caret)
 highlyCor <- findCorrelation(corMat, 0.70)
 dataFilter <- as.data.frame(dataScale[,-highlyCor])
+
+# Add Label to our cleaner Data
 dataFilter$Y <- ifelse(label == 1, 1,0)
 dataFilter$Y <- as.factor(dataFilter$Y)
