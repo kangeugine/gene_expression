@@ -42,7 +42,7 @@ ggplot(data=noFeatvsImp, aes(x=Imp,y=noFeat)) +
         geom_line(colour="darkmagenta", size=3) +
         ggtitle("No.Features by Importance Threshold") +
         labs(x="Importance",y="Number of Features") + 
-        theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
-        theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22))
+        theme(plot.title = element_text(color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(color="#666666", face="bold", size=22))
 
 # We can select features by importance and compare models

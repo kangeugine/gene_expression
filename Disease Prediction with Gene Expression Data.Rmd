@@ -5,13 +5,8 @@ date: "Sunday, August 30, 2015"
 output: word_document
 ---
 
-        Summary
-        Introduction
-        Steps that will follow
-        
-        
-
-
+The aggregation of quality health-related data is paramount to the success of all disease detection initiatives. Without correct and current data, diseases are misunderstood, and undetected. Functioning detection systems are necessary for the success of global health. Gene expression data is the key to detecting diseases, but the difficulty comes due to too much data. This analysis will show how to build a quality model with high-dimensional gene expression data. There are many machine algorithms tested for this analysis, but random forest showed the best performance among the models compared. The analysis goes through 4 stages (1. Data Cleaning, 2. Feature Selection, 3. Compare Models, 4. Optimization) until the final model predicts the outcome for the test dataset. 
+ 
 ```{r,, message=FALSE, include=FALSE}
 load("C:/Users/Golden/Desktop/Test/gene_expression/rMark1.RData")
 require(caret)
@@ -35,7 +30,6 @@ var0 <- nearZeroVar(data)
 length(var0)
 ```
 3245 variables have zero or near zero variance. We decide to discard these variables, because they won't be useful when classifying disease.
-        
 ```{r}
 dataZero <- data[,-var0]
 noNA <- sapply(dataZero, function(x) sum(is.na(x)))
@@ -45,16 +39,14 @@ table(noNA)
 ```{r}
 dataImpute <- knnImputation(dataZero, k=10)
 ```
-   Multicollinearity, the concept that the variables in a regression might be correlated with each other. In the high-dimensional setting, the multicollinearity problem is extreme. Any variable in the model can be written as a linear combination of all of the other variables in the model. Removing variables with a correlation value above 0.7 is an option we can take.
+Multicollinearity, the concept that the variables in a regression might be correlated with each other. In the high-dimensional setting, the multicollinearity problem is extreme. Any variable in the model can be written as a linear combination of all of the other variables in the model. Removing variables with a correlation value above 0.7 is an option we can take.
 ```{r}
 dataScale <- scale(dataImpute, center=TRUE, scale=TRUE)
 corMat <- cor(dataScale)
 highlyCor <- findCorrelation(corMat, 0.70)
-```
-```{r}
 length(highlyCor)
 ```
-   873 variables are removed due to high correlation with other variables. Variables with low information or high correlation are removed. Let's try to select important variables to our models by feature selection.
+873 variables are removed due to high correlation with other variables. Variables with low information or high correlation are removed. Let's try to select important variables to our models by feature selection.
 ```{r}
 dataFilter <- as.data.frame(dataScale[,-highlyCor])
 dataFilter$Y <- ifelse(label == 1, 1,0)
@@ -84,11 +76,11 @@ colnames(fullVarImp) <- c("Imp","Imp2","varName")
 fullVarImp <- fullVarImp[order(fullVarImp$Imp, decreasing=T),]
 ```
 From training a Random Forest model, we get importance levels for each variables that help the classification model. The distribution of importance level is shown by the histogram, and the top variables have an importance higher than 1.
-```{r, cache=TRUE}
+```{r}
 hist(fullVarImp$Imp)
 ```
 
-Our goal is to select the fewest amount of variables, so that we can test more type of models and remain the performance. The number of features selected by importance is shown through the graph. 
+Our goal is to select the fewest amount of variables, so that we can test more type of models and keep the performance. The number of features selected by importance is shown through the graph. 
 ```{r, cache=TRUE, message=FALSE}
 lvl <- seq(1,2,0.05)
 noFeatvsImp <- data.frame(Imp=lvl, 
@@ -98,14 +90,14 @@ ggplot(data=noFeatvsImp, aes(x=Imp,y=noFeat)) +
         geom_line(colour="darkmagenta", size=3) +
         ggtitle("No.Features by Importance Threshold") +
         labs(x="Importance",y="Number of Features") + 
-        theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
-        theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22))
+        theme(plot.title = element_text(color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(color="#666666", face="bold", size=22))
 ```
 
 For a test run, we will select variables with importance higher than 1.1.
 
 3. Compare Models
-====================
+=================
 
 We will be testing the performance of 9 models with the selected features with an importance greater than 1.1.
 ```{r}
@@ -121,7 +113,7 @@ Y <- dataFilter$Y
 levels(Y)[1] <- make.names(levels(Y))[1]
 levels(Y)[2] <- make.names(levels(Y))[2]
 ```
-The models will go through 10-fold cross-validation, and the performance of the models are evaluated through the ROC value. When considering the real life impact of disease detection, we don't want to miss anyone from detection especially when the disease is sever. Sensitivity measures the proportion of positives that are correctly identified, and specificity measures the proportion of negatives that are correctly identified. Metric that evaluates this performance is ROC, receiver operating characteristic. Our goal is to find a model with a ROC higher than 0.9. 
+The models will go through 10-fold cross-validation, and the performance of the models are evaluated through the ROC value. When considering the real life impact of disease detection, we don't want to miss anyone from detection especially when the disease is severe. Sensitivity measures the proportion of positives that are correctly identified, and specificity measures the proportion of negatives that are correctly identified. Metric that evaluates this performance is ROC, receiver operating characteristic. Our goal is to find a model with a ROC higher than 0.9. 
 ```{r, eval=FALSE}
 folds=10
 repeats=1
@@ -135,7 +127,7 @@ myControl <- trainControl(method='cv', number=folds, repeats=repeats,
 PP <- c('center', 'scale')
 ```
 
-The 9 models that will compared are listed below with the code.
+The 9 models that we will compare are listed below with the code.
 ```{r, eval=FALSE}
 set.seed(1)
 # Stochastic Gradient Boosting
@@ -208,6 +200,7 @@ for(i in 1:length(models)){
         resultDF$Model <- models[i]
         modelResult <- rbind(modelResult,resultDF)
 }
+
 # Order models with highest mean ROC value
 modelResultDT <- data.table(modelResult)
 meanROC <- as.data.frame(modelResultDT[,list(Mean=mean(ROC),Max=max(ROC)),by=Model])
@@ -215,13 +208,87 @@ meanROC <- meanROC[order(meanROC$Mean),]
 modelResult$Model <- factor(modelResult$Model,
                        levels = meanROC$Model,ordered = TRUE)
 ```
+
+The horizontal boxplot showing the ROC distribution for each model shows Random Forest as the best performing model for this model. However, we are not quite at the level we desire. ROC value has not reached 0.9. Through optimization of feature selection and parameter adjustment, we will enhance the performance. 
 ```{r, message=FALSE}
 ggplot(modelResult, aes(x=Model, y=ROC)) + geom_boxplot(fill="orange") +
         coord_flip() +
         ggtitle("Compare Models with ROC") +
         labs(x="Models",y="ROC") + 
-        theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
-        theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22)) +
-        theme(axis.text = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=13))
+        theme(plot.title = element_text(color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(color="#666666", face="bold", size=22)) +
+        theme(axis.text = element_text(color="#666666", face="bold", size=13))
 ```
-# We can see that Random Forest shows the best result for our Classification Data
+
+4. Optimization
+===============
+
+Let's see if increasing or decreasing the variables selected will enhance the performance of the model. We will go through a range of importance level and see how the performance of the model changes.
+```{r, eval=FALSE}
+# Adjust features selected and evaluste with Random Forest
+testPerformance <- function(thres){
+        # Prepare data.frame for model
+        featSet <- featSelect(thres)
+        X <- dataFilter[,featSet]
+        # Run model
+        model <- train(X[train,], Y[train], 
+                          method='parRF', 
+                          trControl=myControl, 
+                          tuneLength=10, 
+                          preProcess=PP)
+        # Return result
+        return(model$result)
+}
+thresLvl <- seq(1,1.5,0.05)
+set.seed(1)
+testRange <- lapply(thresLvl, function(x) testPerformance(x))
+testResult <- data.frame()
+for(i in 1:length(thresLvl)){
+        df <- testRange[[i]]
+        df$Thres <- paste("Thres",thresLvl[i])
+        testResult <- rbind(testResult,df)
+}
+```
+```{r}
+ggplot(testResult, aes(x=Thres, y=ROC)) + geom_boxplot(fill="orange") +
+        coord_flip() +
+        ggtitle("Optimal Feature Selection") +
+        labs(x="Threshold",y="ROC") + 
+        theme(plot.title = element_text(color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(color="#666666", face="bold", size=22)) +
+        theme(axis.text = element_text(color="#666666", face="bold", size=13))
+```
+
+The importance level that gives us the best performance is 1.3. 62 variables are selected from the original dataset, but we can further improve the performance by adjusting the model's parameter.
+```{r}
+length(featSelect(1.3))
+# What is the best parameter?
+testRange[[7]]
+```
+
+From the given parameter options, mtry = 55 shows the highest performance. Let's go deeper to determine the exact value for mtry that gives the best performance.
+```{r, eval=FALSE}
+repeats = 3
+set.seed(1)
+X <- dataFilter[,featSelect(1.3)]
+optModel <- train(X[train,], Y[train], 
+               method='parRF', 
+               trControl=myControl, 
+               tuneGrid=expand.grid(.mtry=48:60),
+               preProcess=PP)
+```
+```{r, cache=TRUE}
+optModel$result
+```
+
+We can see mtry 50 or 56 performs the best. The difference between those two parameters do not seem to be significant. We will decide on mtry value 56 for our final model.
+```{r, eval=FALSE}
+set.seed(1)
+finalModel <- train(X[train,], Y[train], 
+                    method='parRF', 
+                    trControl=myControl, 
+                    tuneGrid=expand.grid(.mtry=56),
+                    preProcess=PP)
+```
+
+The final model will predict the disease status from the test dataset. The results from the prediction can be found at https://github.com/kangeugine/gene_expression/blob/master/testPrediction.txt
