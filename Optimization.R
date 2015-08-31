@@ -49,6 +49,7 @@ testRange[[7]]
 # mtry = 55, but lets go deeper
 
 # Let's see how the performace of mtry 48:60 comes out
+repeats = 3
 set.seed(1)
 X <- dataFilter[,featSelect(1.3)]
 optModel <- train(X[train,], Y[train], 
