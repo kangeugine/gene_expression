@@ -24,6 +24,9 @@ script: "Optimization.R"
 1. Find optimal features for performance    
 2. Find optimal parameter for performance   
 3. Final model for test data
+ 
+## Final Prediction
+file: "testPrediction.txt"
 
 ### Predict Test Dataset
 script: "Predict Test Dataset.R"    
