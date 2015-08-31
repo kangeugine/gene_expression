@@ -2,21 +2,70 @@
 title: "Disease Prediction with Gene Expression Data"
 author: "Eugine Kang"
 date: "Sunday, August 30, 2015"
-output: pdf_document
+output: word_document
 ---
 
-This is an R Markdown document. Markdown is a simple formatting syntax for authoring HTML, PDF, and MS Word documents. For more details on using R Markdown see <http://rmarkdown.rstudio.com>.
-
-When you click the **Knit** button a document will be generated that includes both content as well as the output of any embedded R code chunks within the document. You can embed an R code chunk like this:
+        Summary
+        Introduction
+        Steps that will follow
+        
+        
 
 ```{r}
-summary(cars)
+setwd("C:/Users/Golden/Desktop/Splunk/gene_expression_data")
+genex <- read.table("./genex.txt", header=FALSE, sep=" ")
+data <- read.table("./training.txt",header=TRUE, sep=" ")
+label <- read.table("./labels.txt", header=FALSE, sep=" ")
+dim(data)
 ```
 
-You can also embed plots, for example:
+1. Data Cleaning
+================
+```{r}
+dim(data)
+```
+        The data is high-dimensional, meaning the number of variables far exceed the number of samples. Classicial approaches such as least squares linear regression are not appropriate in this setting, and other approaches have the danger of overfitting.
 
-```{r, echo=FALSE}
-plot(cars)
+        We can reduce the dimension by feature selection and dimension reduction techniques, but let's first see if we can discard variables with little information.
+```{r, eval=FALSE}
+require(caret)
+```
+```{r}
+var0 <- nearZeroVar(data)
+length(var0)
+```
+        3245 variables have zero or near zero variance. We decide to discard these variables, because they won't be useful when classifying disease.
+        
+```{r}
+dataZero <- data[,-var0]
+noNA <- sapply(dataZero, function(x) sum(is.na(x)))
+table(noNA)
+```
+        6 columns have missing values. We only have 184 samples, so removing the samples with missing values will be too valuable of a waste. Imputation fills in the missing values, and will allow us to use every sample to train our model
+```{r, eval=FALSE}
+require(DMwR)
+dataImpute <- knnImputation(dataZero, k=10)
+```
+        
+        Multicollinearity, the concept that the variables in a regression might be correlated with each other. In the high-dimensional setting, the multicollinearity problem is extreme. Any variable in the model can be written as a linear combination of all of the other variables in the model. Removing variables with a correlation value above 0.7 is an option we can take.
+```{r, eval=FALSE}
+require(corrplot)
+dataScale <- scale(dataImpute, center=TRUE, scale=TRUE)
+corMat <- cor(dataScale)
+require(caret)
+highlyCor <- findCorrelation(corMat, 0.70)
+```
+```{r}
+length(highlyCor)
+```
+        873 variables are removed due to high correlation with other variables.
+        
+                
+```{r}
+dataFilter <- as.data.frame(dataScale[,-highlyCor])
+dataFilter$Y <- ifelse(label == 1, 1,0)
+dataFilter$Y <- as.factor(dataFilter$Y)
 ```
 
-Note that the `echo = FALSE` parameter was added to the code chunk to prevent printing of the R code that generated the plot.
+2. Feature Selection
+====================
