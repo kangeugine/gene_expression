@@ -12,3 +12,9 @@ script: "Feature Selection.R"
 1. Prepare training scheme, 10-Fold CV    
 2. Calculate feature importance with RandomForest   
 3. Visualize the numbers of features selected by importance threshold   
+
+### Compare Models
+script: "Compare Models.R"    
+1. Select features and prepare data frame      
+2. Compare 9 different models   
+3. ROC as metric to evaluate, compare performance   
