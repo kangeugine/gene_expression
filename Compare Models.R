@@ -116,8 +116,8 @@ ggplot(modelResult, aes(x=Model, y=ROC)) + geom_boxplot(fill="orange") +
         coord_flip() +
         ggtitle("Compare Models with ROC") +
         labs(x="Models",y="ROC") + 
-        theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
-        theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22)) +
-        theme(axis.text = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=13))
+        theme(plot.title = element_text(family = "Verdana", color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(family = "Verdana", color="#666666", face="bold", size=22)) +
+        theme(axis.text = element_text(family = "Verdana", color="#666666", face="bold", size=13))
 
 # We can see that Random Forest shows the best result for our Classification Data
