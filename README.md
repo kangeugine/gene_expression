@@ -17,4 +17,10 @@ script: "Feature Selection.R"
 script: "Compare Models.R"    
 1. Select features and prepare data frame      
 2. Compare 9 different models   
-3. ROC as metric to evaluate, compare performance   
+3. ROC as metric to evaluate, compare performance among models   
+
+### Optimization
+script: "Optimization.R"    
+1. Find optimal features for performance    
+2. Find optimal parameter for performance   
+3. Final Model for Test data
