@@ -9,7 +9,11 @@
 
 # Import test dataset
 test <- read.csv("./test.csv",header=TRUE, sep=",")
-testScale <- as.data.frame(scale(test[,featSelect(1.3)], center = TRUE, scale = TRUE))
+procValues <- preProcess(dataImpute[,1:(length(dataImpute)-1)], 
+                         method = c("center", "scale"))
+testVar <- colnames(dataImpute[,1:(length(dataImpute)-1)])
+testScale <-  predict(procValues, test[,testVar])
+testScale <- testScale[,featSelect(1.3)]
 
 # Predict test dataset with final model
 testPred <- predict(finalModel, newdata=testScale)
