@@ -25,6 +25,7 @@ levels(Y)[2] <- make.names(levels(Y))[2]
 # Prepare training scheme
 folds=10
 repeats=1
+# ROC will be the metric to evaluate the model "summaryFunction=twoClassSummary"
 myControl <- trainControl(method='cv', number=folds, repeats=repeats, 
                           returnResamp='none', classProbs=TRUE,
                           returnData=FALSE, savePredictions=TRUE, 
@@ -90,3 +91,33 @@ mdlGLMNET <- train(X[train,], Y[train],
                    trControl=myControl, 
                    tuneLength=10,
                    preProcess=PP)
+
+# Organize results from each model
+models <- c("Stochastic Gradient Boosintg", "Boosted Tree", "Random Forest", 
+            "Multi-Layer Perceptron", "k-Nearest Neighbots", "EARTH", 
+            "Generalized Linear Model", "SVM Radial", "GLM Net")
+modelList <- list(mdlGBM, mdlBLACKBOOST, mdlPARRF,
+                  mdlMLP, mdlKNN, mdlEARTH,
+                  mdlGLM, mdlSVM, mdlGLMNET)
+modelResult <- data.frame()
+for(i in 1:length(models)){
+        resultDF <- modelList[[i]]$result[,c("ROC","Sens","Spec")]
+        resultDF$Model <- models[i]
+        modelResult <- rbind(modelResult,resultDF)
+}
+require(data.table)
+modelResultDT <- data.table(modelResult)
+meanROC <- as.data.frame(modelResultDT[,list(Mean=mean(ROC),Max=max(ROC)),by=Model])
+meanROC <- meanROC[order(meanROC$Mean),]
+modelResult$Model <- factor(modelResult$Model,
+                       levels = meanROC$Model,ordered = TRUE)
+
+ggplot(modelResult, aes(x=Model, y=ROC)) + geom_boxplot(fill="orange") +
+        coord_flip() +
+        ggtitle("Compare Models with ROC") +
+        labs(x="Models",y="ROC") + 
+        theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
+        theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22)) +
+        theme(axis.text = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=13))
+
+# We can see that Random Forest shows the best result for our Classification Data
