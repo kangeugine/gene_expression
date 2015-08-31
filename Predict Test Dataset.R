@@ -13,3 +13,9 @@ testScale <- as.data.frame(scale(test[,featSelect(1.3)], center = TRUE, scale = 
 
 # Predict test dataset with final model
 testPred <- predict(finalModel, newdata=testScale)
+testPred <- ifelse(testPred == "X0", -1,1)
+
+# Save prediction to file
+testPredDF <- data.frame(Sample=1:length(testPred), Disease=testPred)
+setwd("C:/Users/Golden/Desktop/Test/gene_expression")
+write.table(testPredDF, file="testPrediction.txt", sep=" ", row.names=FALSE)
