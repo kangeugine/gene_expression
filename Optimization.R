@@ -34,7 +34,7 @@ for(i in 1:length(thresLvl)){
 ggplot(testResult, aes(x=Thres, y=ROC)) + geom_boxplot(fill="orange") +
         coord_flip() +
         ggtitle("Optimal Feature Selection") +
-        labs(x="Threshold",y="ROC") + 
+        labs(x="Threshold", y="ROC") + 
         theme(plot.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=25, hjust=0)) +
         theme(axis.title = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=22)) +
         theme(axis.text = element_text(family = "Trebuchet MS", color="#666666", face="bold", size=13))
